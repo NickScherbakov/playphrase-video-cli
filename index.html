@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PlayPhrase 2025</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gray: {
+                            900: '#0f172a',
+                            800: '#1e293b',
+                            700: '#334155',
+                        },
+                        primary: '#3b82f6',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; }
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- Header -->
+    <header class="glass p-4 flex justify-between items-center z-10">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-film text-primary text-2xl"></i>
+            <h1 class="text-xl font-bold tracking-wider">PlayPhrase <span class="text-primary">2025</span></h1>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="toggleUploadModal()" class="p-2 hover:bg-white/10 rounded-full transition" title="Upload">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+            </button>
+            <button onclick="doReindex()" class="p-2 hover:bg-white/10 rounded-full transition" title="Reindex">
+                <i class="fa-solid fa-rotate"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col md:flex-row relative">
+        
+        <!-- Left Panel: Search & Results -->
+        <div class="w-full md:w-1/3 lg:w-1/4 flex flex-col border-r border-white/10 bg-gray-900/50 z-0">
+            <div class="p-4 space-y-3">
+                <div class="relative">
+                    <input id="query" type="text" 
+                        class="w-full bg-gray-800 border border-gray-700 rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:border-primary transition text-white placeholder-gray-500"
+                        placeholder="Search for a phrase..." autofocus />
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-gray-500"></i>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="doSearch()" class="flex-1 bg-primary hover:bg-blue-600 text-white py-2 rounded-lg transition font-medium">
+                        Search
+                    </button>
+                    <button onclick="doRandom()" class="px-4 bg-gray-700 hover:bg-gray-600 text-white py-2 rounded-lg transition" title="I'm Feeling Lucky">
+                        <i class="fa-solid fa-dice"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="resultsList" class="flex-1 overflow-y-auto p-2 space-y-1 scrollbar-hide">
+                <!-- Results will be injected here -->
+                <div class="text-center text-gray-500 mt-10">
+                    <i class="fa-regular fa-keyboard text-4xl mb-2 opacity-50"></i>
+                    <p>Type a phrase to start.</p>
+                    <p class="text-xs mt-2">Use <kbd class="bg-gray-800 px-1 rounded">Enter</kbd> to search</p>
+                </div>
+            </div>
+            
+            <div class="p-3 border-t border-white/10 text-xs text-gray-500 flex justify-between">
+                <span id="resultCount">0 results</span>
+                <span><kbd class="bg-gray-800 px-1 rounded">←</kbd> <kbd class="bg-gray-800 px-1 rounded">→</kbd> to navigate</span>
+            </div>
+        </div>
+
+        <!-- Right Panel: Player -->
+        <div class="flex-1 flex flex-col items-center justify-center bg-black relative group">
+            <video id="player" class="w-full h-full max-h-[80vh] object-contain outline-none" controls></video>
+            
+            <!-- Overlay Controls (visible on hover) -->
+            <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 glass px-6 py-3 rounded-full flex items-center gap-6 opacity-0 group-hover:opacity-100 transition duration-300">
+                <button onclick="prevResult()" class="hover:text-primary transition"><i class="fa-solid fa-backward-step fa-lg"></i></button>
+                <button onclick="togglePlay()" class="hover:text-primary transition"><i id="playIcon" class="fa-solid fa-play fa-xl"></i></button>
+                <button onclick="nextResult()" class="hover:text-primary transition"><i class="fa-solid fa-forward-step fa-lg"></i></button>
+            </div>
+
+            <!-- Current Phrase Overlay -->
+            <div class="absolute bottom-24 w-full text-center px-4 pointer-events-none">
+                <p id="currentPhrase" class="text-xl md:text-3xl font-bold text-white drop-shadow-lg transition-all duration-300 opacity-0 translate-y-4"></p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="absolute top-4 right-4 flex gap-2">
+                <a id="downloadBtn" href="#" target="_blank" class="glass p-2 rounded-lg hover:bg-white/20 transition text-white hidden" title="Download Clip">
+                    <i class="fa-solid fa-download"></i>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+        <div class="glass p-6 rounded-xl w-full max-w-md mx-4 shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Upload Media</h2>
+                <button onclick="toggleUploadModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="uploadForm" onsubmit="return false;" class="space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Video File (.mp4, .mkv)</label>
+                    <input type="file" id="videoFile" accept=".mp4,.mkv" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-blue-600"/>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Subtitle File (.srt)</label>
+                    <input type="file" id="srtFile" accept=".srt" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-700 file:text-white hover:file:bg-gray-600"/>
+                </div>
+                <div class="pt-2">
+                    <button onclick="doUpload()" class="w-full bg-primary hover:bg-blue-600 text-white py-2 rounded-lg transition font-bold">
+                        Upload & Process
+                    </button>
+                </div>
+                <p id="uploadStatus" class="text-xs text-center text-gray-400 h-4"></p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const player = document.getElementById('player');
+        const resultsList = document.getElementById('resultsList');
+        const currentPhraseEl = document.getElementById('currentPhrase');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const playIcon = document.getElementById('playIcon');
+        
+        let results = [];
+        let currentIndex = -1;
+
+        // --- Core Logic ---
+
+        async function doSearch() {
+            const q = document.getElementById('query').value.trim();
+            if (!q) return;
+            
+            setLoading(true);
+            try {
+                const res = await fetch(`/search?q=${encodeURIComponent(q)}`);
+                if (!res.ok) throw new Error('Search failed');
+                results = await res.json();
+                document.getElementById('resultCount').textContent = `${results.length} results`;
+                renderResults();
+                if (results.length > 0) {
+                    playIndex(0);
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Error searching');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        async function doRandom() {
+            setLoading(true);
+            try {
+                const res = await fetch('/random');
+                if (!res.ok) throw new Error('Failed');
+                const item = await res.json();
+                results = [item];
+                document.getElementById('resultCount').textContent = `Random pick`;
+                renderResults();
+                playIndex(0);
+            } catch (e) {
+                console.error(e);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        function renderResults() {
+            resultsList.innerHTML = '';
+            results.forEach((r, i) => {
+                const el = document.createElement('div');
+                el.className = `p-3 rounded-lg cursor-pointer transition hover:bg-white/5 border border-transparent ${i === currentIndex ? 'bg-white/10 border-primary/50' : ''}`;
+                el.innerHTML = `
+                    <div class="text-sm font-medium text-gray-200 line-clamp-2">"${r.text}"</div>
+                    <div class="flex justify-between items-center mt-1">
+                        <span class="text-xs text-gray-500 font-mono">${formatTime(r.start_time)}</span>
+                        <span class="text-xs text-gray-600 truncate max-w-[100px]">${r.video_path.split(/[/\\]/).pop()}</span>
+                    </div>
+                `;
+                el.onclick = () => playIndex(i);
+                el.id = `res-${i}`;
+                resultsList.appendChild(el);
+            });
+        }
+
+        function playIndex(idx) {
+            if (idx < 0 || idx >= results.length) return;
+            
+            // Update UI selection
+            if (currentIndex >= 0) {
+                const prev = document.getElementById(`res-${currentIndex}`);
+                if (prev) prev.classList.remove('bg-white/10', 'border-primary/50');
+            }
+            currentIndex = idx;
+            const curr = document.getElementById(`res-${currentIndex}`);
+            if (curr) {
+                curr.classList.add('bg-white/10', 'border-primary/50');
+                curr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            const r = results[idx];
+            const fileName = r.video_path.split(/[/\\]/).pop();
+            const src = `/media/${fileName}`;
+
+            // Update Download Link
+            downloadBtn.href = `/download/${r.id}`;
+            downloadBtn.classList.remove('hidden');
+
+            // Show Phrase Overlay
+            currentPhraseEl.textContent = r.text;
+            currentPhraseEl.classList.remove('opacity-0', 'translate-y-4');
+            
+            // Player Logic
+            if (player.getAttribute('data-src') !== src) {
+                player.src = src;
+                player.setAttribute('data-src', src);
+                player.load();
+                player.onloadedmetadata = () => {
+                    player.currentTime = r.start_time;
+                    player.play();
+                };
+            } else {
+                player.currentTime = r.start_time;
+                player.play();
+            }
+            
+            updatePlayIcon(true);
+        }
+
+        // --- Player Events ---
+
+        player.addEventListener('timeupdate', () => {
+            if (currentIndex < 0) return;
+            const r = results[currentIndex];
+            if (player.currentTime >= r.end_time) {
+                player.pause();
+                updatePlayIcon(false);
+                // Optional: Auto-play next?
+                // nextResult(); 
+            }
+        });
+
+        player.addEventListener('play', () => updatePlayIcon(true));
+        player.addEventListener('pause', () => updatePlayIcon(false));
+
+        function togglePlay() {
+            if (player.paused) player.play();
+            else player.pause();
+        }
+
+        function updatePlayIcon(isPlaying) {
+            playIcon.className = isPlaying ? 'fa-solid fa-pause fa-xl' : 'fa-solid fa-play fa-xl';
+        }
+
+        function nextResult() { playIndex((currentIndex + 1) % results.length); }
+        function prevResult() { playIndex((currentIndex - 1 + results.length) % results.length); }
+
+        // --- Helpers ---
+
+        function formatTime(s) {
+            const m = Math.floor(s / 60);
+            const sec = Math.floor(s % 60);
+            return `${m}:${sec.toString().padStart(2, '0')}`;
+        }
+
+        function setLoading(isLoading) {
+            const btn = document.querySelector('#btnSearch'); // or similar
+            // Simple visual feedback
+            resultsList.style.opacity = isLoading ? '0.5' : '1';
+        }
+
+        // --- Upload & Reindex ---
+
+        function toggleUploadModal() {
+            const m = document.getElementById('uploadModal');
+            m.classList.toggle('hidden');
+        }
+
+        async function doUpload() {
+            const video = document.getElementById('videoFile').files[0];
+            const srt = document.getElementById('srtFile').files[0];
+            const status = document.getElementById('uploadStatus');
+            
+            if (!video && !srt) { status.textContent = 'Select files first'; return; }
+            
+            const fd = new FormData();
+            if (video) fd.append('video_file', video);
+            if (srt) fd.append('subtitle_file', srt);
+            
+            status.textContent = 'Uploading...';
+            try {
+                const res = await fetch('/upload', { method: 'POST', body: fd });
+                if (!res.ok) throw new Error('Failed');
+                const data = await res.json();
+                status.textContent = `Success! Added ${data.entries_inserted} lines.`;
+                setTimeout(toggleUploadModal, 1500);
+            } catch (e) {
+                status.textContent = 'Error uploading.';
+            }
+        }
+
+        async function doReindex() {
+            if (!confirm('Rebuild entire database?')) return;
+            try {
+                const res = await fetch('/reindex', { method: 'POST' });
+                const data = await res.json();
+                alert(`Reindexed ${data.rows} subtitles.`);
+            } catch (e) {
+                alert('Reindex failed');
+            }
+        }
+
+        // --- Keyboard Shortcuts ---
+
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT') {
+                if (e.key === 'Enter') doSearch();
+                return;
+            }
+            
+            switch(e.key) {
+                case 'ArrowRight': nextResult(); break;
+                case 'ArrowLeft': prevResult(); break;
+                case ' ': e.preventDefault(); togglePlay(); break;
+                case 'r': doRandom(); break;
+            }
+        });
+
+    </script>
+</body>
+</html>
