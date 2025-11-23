@@ -7,22 +7,41 @@ import { VideoPlayer } from '@/components/VideoPlayer'
 import { ResultNavigation } from '@/components/ResultNavigation'
 import { SearchHistory } from '@/components/SearchHistory'
 import { EmptyState } from '@/components/EmptyState'
+import { UploadDialog } from '@/components/UploadDialog'
 import { searchSubtitles, getRandomSuggestions, type SubtitleEntry } from '@/lib/movieDatabase'
 
 function App() {
   const [searchHistory, setSearchHistory] = useKV<string[]>('search-history', [])
   const [currentQuery, setCurrentQuery] = useState('')
   const [searchResults, setSearchResults] = useState<SubtitleEntry[]>([])
+  const [customEntries, setCustomEntries] = useState<SubtitleEntry[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const [suggestions] = useState(getRandomSuggestions(5))
+
+  const handleUpload = (entries: SubtitleEntry[]) => {
+    setCustomEntries(prev => [...prev, ...entries])
+    toast.success(`Added ${entries.length} subtitles to library`)
+  }
 
   const handleSearch = (query: string) => {
     setIsLoading(true)
     setCurrentQuery(query)
     
     setTimeout(() => {
-      const results = searchSubtitles(query)
+      const staticResults = searchSubtitles(query)
+      
+      const lowerQuery = query.toLowerCase().trim()
+      const customResults = customEntries.filter(entry => 
+        entry.text.toLowerCase().includes(lowerQuery)
+      )
+
+      const results = [...staticResults, ...customResults].sort((a, b) => {
+        const aIndex = a.text.toLowerCase().indexOf(lowerQuery)
+        const bIndex = b.text.toLowerCase().indexOf(lowerQuery)
+        return aIndex - bIndex
+      })
+
       setSearchResults(results)
       setCurrentIndex(0)
       setIsLoading(false)
@@ -81,7 +100,12 @@ function App() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <div className="mb-12">
-            <SearchBar onSearch={handleSearch} isLoading={isLoading} />
+            <div className="flex gap-4 items-start mb-6">
+              <div className="flex-1">
+                <SearchBar onSearch={handleSearch} isLoading={isLoading} />
+              </div>
+              <UploadDialog onUpload={handleUpload} />
+            </div>
             <SearchHistory
               history={searchHistory || []}
               onSelectPhrase={handleSearch}
