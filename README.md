@@ -1,23 +1,60 @@
-# ✨ Welcome to Your Spark Template!
-You've just launched your brand-new Spark Template Codespace — everything’s fired up and ready for you to explore, build, and create with Spark!
+# Playphrase Video CLI
 
-This template is your blank canvas. It comes with a minimal setup to help you get started quickly with Spark development.
+Search movies by quote - find any spoken phrase across cinema with instant video playback.
 
-🚀 What's Inside?
-- A clean, minimal Spark environment
-- Pre-configured for local development
-- Ready to scale with your ideas
-  
-🧠 What Can You Do?
+## 🚀 Live Demo
 
-Right now, this is just a starting point — the perfect place to begin building and testing your Spark applications.
+Visit the live application: [https://nickscherbakov.github.io/playphrase-video-cli/](https://nickscherbakov.github.io/playphrase-video-cli/)
 
-🧹 Just Exploring?
-No problem! If you were just checking things out and don’t need to keep this code:
+## 🌟 Features
 
-- Simply delete your Spark.
-- Everything will be cleaned up — no traces left behind.
+- **Phrase Search**: Full-text search across movie/TV subtitle database with instant results
+- **Video Clip Playback**: Plays 10-second video clips centered on the exact moment the phrase is spoken
+- **Result Navigation**: Browse through all matches of the searched phrase across different movies
+- **Search History**: Revisit interesting phrases without retyping
 
-📄 License For Spark Template Resources 
+## 🛠️ Development
+
+### Prerequisites
+
+- Node.js 20 or higher
+- npm
+
+### Installation
+
+```bash
+npm install
+```
+
+### Development Server
+
+```bash
+npm run dev
+```
+
+### Build
+
+```bash
+npm run build
+```
+
+### Preview Production Build
+
+```bash
+npm run preview
+```
+
+## 🚀 Deployment
+
+This application is automatically deployed to GitHub Pages when changes are pushed to the `main` branch.
+
+The deployment workflow:
+1. Builds the Vite application
+2. Uploads the build artifacts
+3. Deploys to GitHub Pages
+
+You can also manually trigger a deployment from the Actions tab.
+
+## 📄 License For Spark Template Resources 
 
 The Spark Template files and resources from GitHub are licensed under the terms of the MIT license, Copyright GitHub, Inc.
