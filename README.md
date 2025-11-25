@@ -6,7 +6,15 @@ Search movies by quote - find any spoken phrase across cinema with instant video
 
 Visit the live application: [https://nickscherbakov.github.io/playphrase-video-cli/](https://nickscherbakov.github.io/playphrase-video-cli/)
 
-> **Note:** If the live demo shows a blank page, GitHub Pages may not be enabled yet. See [SETUP_GITHUB_PAGES.md](./SETUP_GITHUB_PAGES.md) for quick setup instructions (takes 2 minutes).
+> **⚠️ Сайт показывает черный экран?** 
+> 
+> **СРОЧНО:** GitHub Pages не активирован! Следуйте инструкциям в [QUICK_FIX.md](./QUICK_FIX.md) (3 минуты)
+> 
+> **Кратко:**
+> 1. Откройте: https://github.com/NickScherbakov/playphrase-video-cli/settings/pages
+> 2. Source → выберите **"GitHub Actions"** (не "Deploy from a branch"!)
+> 3. В терминале: `git add . && git commit -m "Enable Pages" && git push`
+> 4. Ждите 2 минуты → обновите страницу
 
 ## 🌟 Features
 
