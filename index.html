@@ -15,8 +15,26 @@
 </head>
 
 <body>
-    <div id="root"></div>
-    <script type="module" src="./src/main.tsx"></script>
+        <div id="spark-app">
+            <div id="root"></div>
+        </div>
+        <script>
+            // Basic runtime error surface to diagnose blank screen on Pages
+            window.onerror = function(message, source, lineno, colno, error) {
+                const existing = document.getElementById('__playphrase_error')
+                if (existing) return
+                const box = document.createElement('pre')
+                box.id = '__playphrase_error'
+                box.style.background = '#200'
+                box.style.color = '#fdd'
+                box.style.padding = '1rem'
+                box.style.fontFamily = 'monospace'
+                box.style.whiteSpace = 'pre-wrap'
+                box.textContent = '[Runtime Error]\n' + message + '\n' + (error && error.stack ? error.stack : '')
+                document.body.appendChild(box)
+            }
+        </script>
+        <script type="module" src="./src/main.tsx"></script>
 </body>
 
 </html>
