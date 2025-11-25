@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { parseSRT } from '@/lib/srtParser'
+import { parseSubtitles } from '@/lib/srtParser'
 import { SubtitleEntry } from '@/lib/movieDatabase'
 import { Upload } from 'lucide-react'
 
@@ -24,7 +24,7 @@ export function UploadDialog({ onUpload }: UploadDialogProps) {
     setIsProcessing(true)
     try {
       const srtContent = await srtFile.text()
-      const parsedSubtitles = parseSRT(srtContent)
+      const parsedSubtitles = parseSubtitles(srtContent, srtFile.name)
       const videoUrl = URL.createObjectURL(videoFile)
 
       const newEntries: SubtitleEntry[] = parsedSubtitles.map(sub => ({
@@ -82,11 +82,11 @@ export function UploadDialog({ onUpload }: UploadDialogProps) {
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="srt-file">Subtitles (SRT)</Label>
+            <Label htmlFor="srt-file">Subtitles (SRT, VTT)</Label>
             <Input
               id="srt-file"
               type="file"
-              accept=".srt"
+              accept=".srt,.vtt"
               onChange={(e) => setSrtFile(e.target.files?.[0] || null)}
             />
           </div>
