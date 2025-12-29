@@ -11,7 +11,7 @@
 
 ## Зависимости
 - Python 3.10+ (протестировано на Python 3.14)
-- ffmpeg в PATH (`ffmpeg -version`)
+- ffmpeg (см. [FFMPEG_SETUP.md](FFMPEG_SETUP.md) для инструкций по установке)
 - Библиотеки: FastAPI, Uvicorn, Pydantic v2
 
 ## Супер-простой запуск (минимум действий)
@@ -119,7 +119,8 @@ playphrase/
 ## Устранение неполадок
 
 ### ffmpeg не найден
-Убедитесь, что ffmpeg установлен и доступен в PATH:
+Следуйте инструкциям в [FFMPEG_SETUP.md](FFMPEG_SETUP.md) для установки FFmpeg.
+Затем убедитесь, что ffmpeg доступен:
 ```powershell
 ffmpeg -version
 ```
